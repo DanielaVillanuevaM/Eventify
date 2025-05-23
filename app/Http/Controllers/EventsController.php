@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Event;
 
 class EventsController extends Controller
 {
     public function CRUDindex()
     {
-
-        return view('CRUD-events');
+        $events = Event::all();
+        return view('CRUD-events', compact('events'));
     }
 }
