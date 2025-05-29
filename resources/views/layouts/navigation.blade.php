@@ -11,9 +11,48 @@
 
                 </div>
 
+                
+
                 <!-- Navigation Links -->
                 <nav class="hidden md:block ml-10 mt-3">
                     <div class="flex items-center space-x-4">
+                        {{-- Eventos --}}
+                         <x-nav-link :href="route('eventosp.index')" :active="request()->routeIs('eventosp.index')">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 " fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Eventos
+                            </div>
+                        </x-nav-link>
+                        {{-- Mis eventos --}}
+                        <x-nav-link :href="route('miseventos.index')" :active="request()->routeIs('miseventos.index')">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 " fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Mis eventos
+                            </div>
+                        </x-nav-link>
+                    @php
+                            $rol = Auth::user()->rol;
+                    @endphp
+                    @if ($rol === 'Administrador' || $rol === 'Organizador')
+                    {{-- Mis proyectos --}}
+                        <x-nav-link :href="route('misproyectos.index')" :active="request()->routeIs('misproyectos.index')">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 " fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Mis proyectos
+                            </div>
+                        </x-nav-link>
                         {{-- Lugares --}}
                         <x-nav-link :href="route('lugares.index')" :active="request()->routeIs('lugares.index')">
                             <div class="flex items-center">
@@ -39,19 +78,8 @@
                                 Usuarios
                             </div>
                         </x-nav-link>
-                        
 
-                        {{-- Eventos --}}
-                         <x-nav-link :href="route('eventosp.index')" :active="request()->routeIs('eventos*')">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-2 " fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                Eventos
-                            </div>
-                        </x-nav-link>
+                    @endif 
 
                         
                     </div>
@@ -110,6 +138,18 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('eventosp.index')" :active="request()->routeIs('eventosp.index')">
                 {{ __('Eventos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('miseventos.index')" :active="request()->routeIs('miseventos.index')">
+                {{ __('Mis eventos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('misproyectos.index')" :active="request()->routeIs('misproyectos.index')">
+                {{ __('Mis proyectos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('lugares.index')" :active="request()->routeIs('lugares.index')">
+                {{ __('Lugares') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.index')">
+                {{ __('Usuarios') }}
             </x-responsive-nav-link>
         </div>
 

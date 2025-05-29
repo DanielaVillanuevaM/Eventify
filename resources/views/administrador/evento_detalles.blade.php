@@ -32,13 +32,17 @@
                         </div>
                     </div>
 
-                    @if($evento->estado === 'publico')
+                    @if($evento->estado === 'publico' && $evento->user_id !== Auth::id())
+                        <form method="POST" action="{{ route('eventos.asistir', ['evento' => $evento->id]) }}">
+                        @csrf
+                        <input type="hidden" name="evento_id" value="{{ $evento->id }}">
                         <div class="mt-6 md:mt-0">
-                            <button class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-6 rounded-lg shadow-md backdrop-filter backdrop-blur-sm transition duration-300 border border-white border-opacity-20">
+                            <button type="submit" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-6 rounded-lg shadow-md backdrop-filter backdrop-blur-sm transition duration-300 border border-white border-opacity-20">
                                 Asistir a evento
                             </button>
                         </div>
-                    @endif
+                         </form>
+                     @endif    
                 </div>
             </div>
         </div>
@@ -50,8 +54,12 @@
                     <div class="flex space-x-8">
                         <div class="tab tab-active text-white py-4 px-1" data-tab="details" onclick="switchTab('details')">Detalles</div>
                         <div class="tab text-white  py-4 px-1" data-tab="location" onclick="switchTab('location')">Ubicación</div>
+                        @php
+                            $rol = Auth::user()->rol;
+                        @endphp
+                        @if ($rol === 'Administrador' || $rol === 'Organizador')
                         <div class="tab text-white py-4 px-1" data-tab="guests" onclick="switchTab('guests')">Invitados</div>
-
+                        @endif
                     </div>
                 </div>
                 <div id="tab-details" class="tab-content">
@@ -69,7 +77,7 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <p class="font-medium text-gray-200">{{ $evento->organizador}}</p>
+                                <p class="font-medium text-gray-200">{{ $evento->nombre_usuario}}</p>
                                 <p class="text-gray-400 text-sm">Organizador de eventos</p>
                             </div>
                         </div>
@@ -99,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div id="tab-guests" class="tab-content hidden">
                         <div class="dark-card rounded-lg shadow-md p-6 mb-8">
                         <div class="flex justify-between items-center mb-6">
@@ -111,12 +119,12 @@
                                     </svg>
                                     Agregar invitado
                                 </button>
-                                <button id="download-list-btn" class="dark-btn py-2 px-4 rounded-lg flex items-center transition duration-300">
+                               <a href="{{ route('evento.invitados.pdf', $evento->id) }}" id="download-list-btn" class="dark-btn py-2 px-4 rounded-lg flex items-center transition duration-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
                                     Descargar lista
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -131,7 +139,28 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-700" id="guests-table-body">
-                                    
+                                    @foreach ($usuariosInvitados as $user)
+                                        <tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td class="text-sm font-medium text-gray-200 px-6 py-4 whitespace-nowrap">{{ $user->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ $user->email }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ ucfirst($user->estado) }}</td>
+                                            <td class="py-2 px-4 flex space-x-2">
+                                                <a href="#" onclick="event.preventDefault(); openEditModal({{ $user->id }}, '{{ $user->estado }}', {{ $evento->id }})" class="btn-edit p-2 rounded-lg text-white">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    </svg>
+                                                </a>
+                                                <a href="{{ route('eliminar.solicitud', ['usuario_id' => $user->id, 'evento_id' => $evento->id]) }}" 
+                                                    class="btn-danger p-2 rounded-lg text-white">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
+                                                        </svg>
+                                                    </a>
+
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -139,7 +168,91 @@
                 </div>
                 </div>
             </div>
-    </div>    
+
+            
+    </div> 
+    
+     <div id="inviteModal" class="modal fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black opacity-50"></div>
+            <div class="modal-content relative bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-auto p-6">
+                <div class="flex justify-between items-center mb-4">
+
+                    <h3 class="text-xl font-bold text-white">Invitar personas</h3>
+                    <button id="closepersonEventModal" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+</div>    
+                    <div class="max-h-60 overflow-y-auto mb-4">
+                        <ul>
+                            @foreach ($usuariosNoInvitados as $usuario)
+                                <li class="user-item flex items-center justify-between p-3 rounded-lg hover:bg-gray-700">
+                                    <div class="flex items-center">
+                                        @php
+                                            $initials = strtoupper(substr($usuario->name, 0, 1) . (strpos($usuario->name, ' ') !== false ? substr(explode(' ', $usuario->name)[1], 0, 1) : ''));
+                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
+                                            $color = $colors[$loop->index % count($colors)];
+                                        @endphp
+                                        <div class="w-8 h-8 rounded-full {{ $color }} flex items-center justify-center">
+                                            <span class="text-xs font-medium text-white">{{ $initials }}</span>
+                                        </div>
+                                        <span class="ml-3 text-white">{{ $usuario->name }}</span>
+                                    </div>
+                                    <form action="{{ route('agregar.invitacion') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="evento_id" value="{{ $evento->id }}">
+                                        <input type="hidden" name="usuario_id" value="{{ $usuario->id }}">
+                                        <button type="submit" class="btn-primary text-xs px-3 py-1 rounded-lg">Invitar</button>
+                                    </form>
+                                </li>
+                            @endforeach
+                        </ul>
+                  </div>
+            </div>
+            </div>
+            </div>
+   
+    </div>
+
+    <div id="editModal" class="modal fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 mt-4">
+            <div class="fixed inset-0 bg-black opacity-50"></div>
+            <div class="modal-content relative bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-auto p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">Editar solicitud</h3>
+                    <button id="closeEditEventModal" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form id="editForm" method="post">
+                     @csrf
+                    <input type="hidden" name="usuario_id" id="editId">
+                    <input type="hidden" name="evento_id" id="editEventoId">
+
+
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-medium mb-2">Estado</label>
+                        <select id="editEstado" name="estado" required
+                            class="w-full bg-gray-700 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="aceptada">Aceptada</option>
+                            <option value="rechazada">Rechazada</option>
+                        </select>
+                    </div>
+
+
+                    <div class="flex justify-end">
+                        <button type="button" id="cancelEditEvent" class="btn-secondary px-4 py-2 rounded-lg text-white mr-2">Cancelar</button>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-white">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
          function switchTab(tabId) {
 
@@ -161,5 +274,56 @@
     if (activeTab) activeTab.classList.add('tab-active');
 }
 
-    </script>    
+    </script>   
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addGuestBtn = document.getElementById('add-guest-btn');
+        const inviteModal = document.getElementById('inviteModal');
+        const closeInviteModal = document.getElementById('closeInviteModal');
+        const cancelInviteBtn = document.getElementById('cancelInvite');
+
+        // Mostrar modal
+        addGuestBtn.addEventListener('click', () => {
+            inviteModal.classList.remove('hidden');
+        });
+
+        // Cerrar modal
+        function closeModal() {
+            inviteModal.classList.add('hidden');
+        }
+
+        closeInviteModal.addEventListener('click', closeModal);
+        cancelInviteBtn.addEventListener('click', closeModal);
+
+        // Cierra si hace clic fuera del modal
+        window.addEventListener('click', function (e) {
+            if (e.target === inviteModal) {
+                closeModal();
+            }
+        });
+    });
+</script>
+
+<script>
+    function openEditModal(id, estado, eventId) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editEstado').value = estado;
+    document.getElementById('editEventoId').value = eventId;
+    document.getElementById('editForm').action = `/editarEstado/${id}`;
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+
+    document.getElementById('closeEditEventModal').addEventListener('click', () => {
+        document.getElementById('editModal').classList.add('hidden');
+    });
+
+    document.getElementById('closepersonEventModal').addEventListener('click', () => {
+        document.getElementById('inviteModal').classList.add('hidden');
+    });
+    document.getElementById('cancelEditEvent').addEventListener('click', () => {
+        document.getElementById('editModal').classList.add('hidden');
+    });
+</script>
 </x-app-layout>

@@ -3,11 +3,96 @@
         <div class="container mx-auto px-2">
             <div class="mb-6 flex items-center justify-between">
             <div>
-                <h2 class="text-2xl font-bold text-white mb-2">Eventos</h2>
-                <p class="text-gray-400">Ve todos los eventos a los que puedes asistir</p>
+                <h2 class="text-2xl font-bold text-white mb-2">Mis proyectos</h2>
+                <p class="text-gray-400">Gestiona y organiza todos tus eventos.</p>
+            </div>
+            @php
+                 $rol = Auth::user()->rol;
+            @endphp
+
+            @if ($rol === 'Administrador' || $rol === 'Organizador')
+            <button id="addEventBtn" class="btn-primary px-6 py-2 rounded-lg text-white flex items-center ml-6">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Agregar Evento
+            </button>
+            @endif
             </div>
         </div>
     </main>
+
+    <!-- Modal para agregar evento -->
+    <div id="addEventModal" class="modal fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 mt-4">
+            <div class="fixed inset-0 bg-black opacity-50"></div>
+            <div class="modal-content relative bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-auto p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">Agregar nuevo evento</h3>
+                    <button id="closeAddEventModal" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form action="{{ route('guardar.evento') }}" method="post">
+                     @csrf
+                    
+
+                    @php
+                        $user_id = Auth::user()->id;
+                    @endphp
+
+                    <input type="hidden" name="user_id" value="{{ $user_id }}">
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-medium mb-2">Nombre del evento</label>
+                        <input name="nombre" type="text" class="w-full bg-gray-700 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Nombre del evento" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Fecha</label>
+                            <input name="fecha" type="date" class="w-full bg-gray-700 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Hora</label>
+                            <input name="hora" type="time" class="w-full bg-gray-700 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-medium mb-2">Ubicación</label>
+                        <select name="lugar" class="w-full bg-gray-700 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                             @foreach($lugares as $lugar)
+                                <option value="{{ $lugar->id }}">{{ $lugar->nombre }}</option>
+                             @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-medium mb-2">Descripción</label>
+                        <textarea name="descripcion" class="w-full bg-gray-700 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 h-24" placeholder="Descripción del evento" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-300 text-sm font-medium mb-2">Tipo de evento</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="estado" value="publico" class="form-radio h-4 w-4 text-purple-500" required>
+                                <span class="ml-2 text-gray-300">Público</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="estado" value="privado" class="form-radio h-4 w-4 text-purple-500" required>
+                                <span class="ml-2 text-gray-300">Privado</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" id="cancelAddEvent" class="btn-secondary px-4 py-2 rounded-lg text-white mr-2">Cancelar</button>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-white">Crear evento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal para editar evento -->
     <div id="editModal" class="modal fixed inset-0 z-50 hidden overflow-y-auto">
@@ -114,21 +199,12 @@
                             </svg>
                             Ver detalles
                         </a>
-
-                        @if ($evento->estado == 'publico')
-                        <form action="{{ route('eventos.asistir', $evento->id) }}" method="POST">
-                         @csrf
-                            <button type="submit" class="btn-primary flex-1 py-2 px-3 rounded-lg text-sm text-white flex items-center justify-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>Asistir</button>
-                        </form>            
-                        @endif            
+           
                         @php
                             $rol = Auth::user()->rol;
                         @endphp
 
-                        @if ($rol === 'Administrador')
+                        @if ($rol === 'Administrador' || $rol === 'Organizador')
                             
                             <a href="#"
                             onclick="openEditModal({{ $evento->id }}, '{{ $evento->nombre }}', '{{ $evento->descripcion }}', '{{ $evento->lugar_nombre }}', '{{ $evento->estado }}', '{{ $evento->fecha_evento }}', '{{ $evento->hora_evento }}')"

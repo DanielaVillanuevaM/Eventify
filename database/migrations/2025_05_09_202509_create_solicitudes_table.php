@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('solicitudes', function (Blueprint $table) {
             $table->id();
-            $table->string('estado')->default('solicitado');
+            $table->string('estado')->default('pendiente');
             $table->bigInteger('evento_id')->unsigned();
             $table->bigInteger('usuario_id')->unsigned();
             $table->foreign('evento_id')->references("id")->on('eventos')->onDelete('cascade');

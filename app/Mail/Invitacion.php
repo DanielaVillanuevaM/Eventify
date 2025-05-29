@@ -12,11 +12,15 @@ use Illuminate\Queue\SerializesModels;
 class Invitacion extends Mailable
 {
     use Queueable, SerializesModels;
+    public $evento;
+    public $usuarioInvitador;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public $pedidos) {}
+    public function __construct($evento) {
+        $this->evento = $evento;
+    }
 
     /**
      * Get the message envelope.
@@ -24,20 +28,21 @@ class Invitacion extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reporte Itzel Negrete',
+            subject: 'Invitación Eventify' ,
         );
     }
 
     /**
      * Get the message content definition.
      */
-    public function content(): Content
+      public function content(): Content
     {
         return new Content(
-            view: 'emails.reporte',
-            with: ['pedidos' => $this->pedidos],
+            view: 'emails.invitacion_evento',
+            with: ['evento' => $this->evento],
         );
     }
+
 
     /**
      * Get the attachments for the message.

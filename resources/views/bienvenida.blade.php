@@ -83,13 +83,7 @@
                 </div>
                 <div class="hidden md:flex space-x-4">
                 </div>
-                <div class="md:hidden">
-                    <button class="text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                </div>
+                
             </div>
         </header>
 
@@ -191,15 +185,17 @@
                             <p class="text-gray-400">Envía invitaciones que mantengan a tus invitados informados.</p>
                         </div>
                         
-                        <div class="bg-gray-800 bg-opacity-50 p-8 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
+                       <div class="bg-gray-800 bg-opacity-50 p-8 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
                             <div class="bg-blue-500 bg-opacity-20 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-6">
-                                <svg class="w-8 h-8 text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                
+                                <svg class="w-8 h-8 text-blue-400" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z" clip-rule="evenodd"/>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold mb-3">Análisis en Tiempo Real</h3>
-                            <p class="text-gray-400">Obtén estadísticas detalladas sobre la asistencia, participación y éxito de tus eventos para mejorar futuras experiencias.</p>
+                            <h3 class="text-xl font-semibold mb-3">Ubicación del Evento</h3>
+                            <p class="text-gray-400">Visualiza el lugar exacto del evento con integración de mapas.</p>
                         </div>
+
                     </div>
                 </div>
             </section>

@@ -3,8 +3,8 @@
         <div class="container mx-auto px-2">
             <div class="mb-6 flex items-center justify-between">
             <div>
-                <h2 class="text-2xl font-bold text-white mb-2">Eventos</h2>
-                <p class="text-gray-400">Ve todos los eventos a los que puedes asistir</p>
+                <h2 class="text-2xl font-bold text-white mb-2">Mis eventos</h2>
+                <p class="text-gray-400">Ve el estado de tu solicitud a los eventos que mas te agradaron y las invitaciones que tienes.</p>
             </div>
         </div>
     </main>
@@ -107,6 +107,7 @@
                         <span class="text-sm">{{ $evento->lugar_nombre ?? 'Ubicación no definida' }}</span>
                     </div>
                     <div class="flex space-x-2">
+                    
                         <a href="{{ route('eventos.mostrar', $evento->id) }}" class="btn-secondary flex-1 py-2 px-3 rounded-lg text-sm text-white flex items-center justify-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -115,15 +116,65 @@
                             Ver detalles
                         </a>
 
-                        @if ($evento->estado == 'publico')
-                        <form action="{{ route('eventos.asistir', $evento->id) }}" method="POST">
-                         @csrf
-                            <button type="submit" class="btn-primary flex-1 py-2 px-3 rounded-lg text-sm text-white flex items-center justify-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>Asistir</button>
-                        </form>            
-                        @endif            
+                        @php
+    $estado = $evento->estado_solicitud ?? null;
+    $colores = [
+        'aceptada' => 'bg-green-600',
+        'rechazada' => 'bg-red-600',
+        'pendiente' => 'bg-yellow-400',
+    ];
+    $iconos = [
+        'aceptada' => 'M5 13l4 4L19 7',          // ícono check
+        'rechazada' => 'M6 18L18 6M6 6l12 12',   // ícono X
+        'pendiente' => 'M12 8v4l3 3',            // ícono reloj simple
+    ];
+@endphp
+
+@if($evento->estado == 'privado')
+    @if($estado === 'pendiente')
+        {{-- Botones Aceptar / Rechazar solo si está pendiente --}}
+        <div class="flex gap-2">
+            <!-- Botón Aceptar -->
+            <form action="{{ route('solicitud.aceptar', $evento->id) }}" method="POST" class="inline">
+                @csrf
+                <button class="bg-green-600 hover:bg-green-700 p-2 rounded-lg text-white" title="Aceptar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Botón Rechazar -->
+            <form action="{{ route('solicitud.rechazar', $evento->id) }}" method="POST" class="inline">
+                @csrf
+                <button class="bg-red-600 hover:bg-red-700 p-2 rounded-lg text-white" title="Rechazar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    @else
+        {{-- Mostrar estado si ya fue aceptado o rechazado --}}
+        <span class="flex-1 py-2 px-3 rounded-lg text-sm text-white flex items-center justify-center {{ $colores[$estado] ?? 'bg-gray-500' }}">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconos[$estado] ?? '' }}" />
+            </svg>
+            {{ ucfirst($estado) }}
+        </span>
+    @endif
+
+@elseif($evento->estado == 'publico' && $estado)
+    {{-- Mostrar estado para eventos públicos --}}
+    <span class="flex-1 py-2 px-3 rounded-lg text-sm text-white flex items-center justify-center {{ $colores[$estado] ?? 'bg-gray-500' }}">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconos[$estado] ?? '' }}" />
+        </svg>
+        {{ ucfirst($estado) }}
+    </span>
+@endif
+
+                          
                         @php
                             $rol = Auth::user()->rol;
                         @endphp
